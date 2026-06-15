@@ -1,8 +1,6 @@
 // ===============================
 // INITIALIZATION
 // ===============================
-
-// AOS (scroll reveal library)
 AOS.init({
     duration: 900,
     easing: "ease-in-out",
@@ -12,7 +10,7 @@ AOS.init({
 
 
 // ===============================
-// CACHED DOM ELEMENTS
+// DOM ELEMENTS
 // ===============================
 const header = document.querySelector(".header");
 const menuBtn = document.querySelector(".menu-btn");
@@ -22,17 +20,19 @@ const sections = document.querySelectorAll("section");
 const counters = document.querySelectorAll(".counter");
 const statsSection = document.querySelector(".stats");
 const galleryImages = document.querySelectorAll(".gallery-grid img");
+const contactForm = document.querySelector(".contact-form");
+const hero = document.querySelector(".hero");
 
 
 // ===============================
-// MOBILE NAVIGATION
+// MOBILE MENU
 // ===============================
 menuBtn.addEventListener("click", () => {
     navLinks.classList.toggle("active");
     menuBtn.classList.toggle("active");
 });
 
-// close menu on link click
+// close when nav link clicked
 navItems.forEach(link => {
     link.addEventListener("click", () => {
         navLinks.classList.remove("active");
@@ -40,103 +40,115 @@ navItems.forEach(link => {
     });
 });
 
+// close when clicking outside
+document.addEventListener("click", (e) => {
+    if (
+        !menuBtn.contains(e.target) &&
+        !navLinks.contains(e.target)
+    ) {
+        navLinks.classList.remove("active");
+        menuBtn.classList.remove("active");
+    }
+});
+
 
 // ===============================
-// STICKY NAVBAR + ACTIVE LINK + PARALLAX
-// (optimized single scroll handler)
+// SCROLL EVENTS
 // ===============================
-let lastScrollY = window.scrollY;
-
 window.addEventListener("scroll", () => {
     const scrollY = window.scrollY;
 
-    // ---------- Sticky Navbar ----------
+    // Sticky navbar
     if (scrollY > 80) {
         header.classList.add("scrolled");
     } else {
         header.classList.remove("scrolled");
     }
 
-    // ---------- Active Section Highlight ----------
+    // Active nav highlighting
     let currentSection = "";
 
     sections.forEach(section => {
         const sectionTop = section.offsetTop - 150;
         const sectionHeight = section.clientHeight;
 
-        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        if (
+            scrollY >= sectionTop &&
+            scrollY < sectionTop + sectionHeight
+        ) {
             currentSection = section.getAttribute("id");
         }
     });
 
     navItems.forEach(link => {
         link.classList.remove("active");
+
         if (link.getAttribute("href") === `#${currentSection}`) {
             link.classList.add("active");
         }
     });
 
-    // ---------- Hero Parallax Effect ----------
-    const hero = document.querySelector(".hero");
+    // Hero parallax
     if (hero) {
         hero.style.backgroundPosition = `center ${scrollY * 0.4}px`;
     }
-
-    lastScrollY = scrollY;
 });
 
 
 // ===============================
-// COUNTER ANIMATION (INTERSECTION OBSERVER)
+// COUNTER ANIMATION
 // ===============================
 const animateCounters = () => {
     counters.forEach(counter => {
-        const target = +counter.getAttribute("data-target");
+        const target = +counter.dataset.target;
         let current = 0;
+        const step = target / 100;
 
-        const step = target / 120;
-
-        const update = () => {
+        const updateCounter = () => {
             current += step;
 
             if (current < target) {
                 counter.innerText = Math.ceil(current);
-                requestAnimationFrame(update);
+                requestAnimationFrame(updateCounter);
             } else {
                 counter.innerText = target;
             }
         };
 
-        update();
+        updateCounter();
     });
 };
 
-const observer = new IntersectionObserver(entries => {
+const counterObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             animateCounters();
+            counterObserver.disconnect();
         }
     });
 }, {
     threshold: 0.5
 });
 
-if (statsSection) observer.observe(statsSection);
+if (statsSection) {
+    counterObserver.observe(statsSection);
+}
 
 
 // ===============================
-// SMOOTH SCROLL NAVIGATION
+// SMOOTH SCROLL
 // ===============================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener("click", (e) => {
+    anchor.addEventListener("click", function (e) {
         e.preventDefault();
 
-        const target = document.querySelector(anchor.getAttribute("href"));
+        const target = document.querySelector(
+            this.getAttribute("href")
+        );
 
         if (target) {
             target.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
+                behavior: "smooth"
             });
         }
     });
@@ -144,16 +156,13 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 
 // ===============================
-// FORM UX HANDLING
+// CONTACT FORM
 // ===============================
-const contactForm = document.querySelector(".contact-form");
-
 if (contactForm) {
     contactForm.addEventListener("submit", (e) => {
         e.preventDefault();
 
         const button = contactForm.querySelector("button");
-
         button.innerText = "Sending...";
 
         setTimeout(() => {
@@ -168,43 +177,40 @@ if (contactForm) {
 // ===============================
 // GALLERY LIGHTBOX
 // ===============================
-let lightbox = null;
-
-const createLightbox = (imgSrc) => {
-    lightbox = document.createElement("div");
-    lightbox.classList.add("lightbox");
-
-    lightbox.innerHTML = `
-        <div class="lightbox-content">
-            <img src="${imgSrc}" alt="Gallery Image">
-            <span class="close">&times;</span>
-        </div>
-    `;
-
-    document.body.appendChild(lightbox);
-
-    // close events
-    lightbox.addEventListener("click", (e) => {
-        if (e.target.classList.contains("lightbox") || e.target.classList.contains("close")) {
-            lightbox.remove();
-        }
-    });
-};
-
-// attach click events to gallery images
 galleryImages.forEach(img => {
     img.addEventListener("click", () => {
-        createLightbox(img.src);
+        const lightbox = document.createElement("div");
+        lightbox.classList.add("lightbox");
+
+        lightbox.innerHTML = `
+            <div class="lightbox-content">
+                <img src="${img.src}" alt="">
+                <span class="close">&times;</span>
+            </div>
+        `;
+
+        document.body.appendChild(lightbox);
+
+        lightbox.addEventListener("click", (e) => {
+            if (
+                e.target.classList.contains("lightbox") ||
+                e.target.classList.contains("close")
+            ) {
+                lightbox.remove();
+            }
+        });
     });
 });
 
 
 // ===============================
-// SCROLL REVEAL ENHANCEMENT (fallback micro animation layer)
+// REVEAL ANIMATIONS
 // ===============================
-const revealElements = document.querySelectorAll(".program-card, .glass-card, .impact-box, .stat-card");
+const revealElements = document.querySelectorAll(
+    ".program-card, .glass-card, .impact-box, .stat-card"
+);
 
-const revealObserver = new IntersectionObserver(entries => {
+const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.classList.add("revealed");
@@ -214,4 +220,6 @@ const revealObserver = new IntersectionObserver(entries => {
     threshold: 0.15
 });
 
-revealElements.forEach(el => revealObserver.observe(el));
+revealElements.forEach(el => {
+    revealObserver.observe(el);
+});
