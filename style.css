@@ -558,21 +558,44 @@ ul{
 
 .team{
 
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
+    display:flex;
+    justify-content: space-around;
     gap:20px;
+}
+.team .section_header{
+    text-align:center;
+}
+.team .section_header h2{
+    font-size:2rem;
+    font-family:'Poppins',sans-serif;
+    color:var(--primary);
+    padding-bottom: 10px;
+}
+.team .section_header span{
+    color:var(--secondary);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:2px;
 }
 .team .gallery{
 
-    display:grid;
+    display:flex;
 
-    grid-template-columns:repeat(3,1fr);
+    flex-wrap:wrap;
 
     gap:20px;
 }
 .team .gallery img{
+
+    border-radius:18px;
+
+    height:280px;
+
+    object-fit:cover;
+
+    transition:.5s;
+}
+.team .gallery img:hover{
 
     transform:scale(1.05);
 }
