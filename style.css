@@ -582,22 +582,25 @@ ul{
     display:flex;
 
     flex-wrap:wrap;
+    margin-left: 2%;
+    margin-right: 2%;
 
-    gap:20px;
 }
 .team .gallery img{
 
     border-radius:18px;
 
-    height:280px;
+    min-height:280px;
 
     object-fit:cover;
-
+    max-width: 96%;
     transition:.5s;
+    padding-bottom: 20px;
+
 }
 .team .gallery img:hover{
 
-    transform:scale(1.05);
+    transform:scale(1.03);
 }
 
 /* ==========================
